@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# npm install -D @tailwindcss/{aspect-ratio,typography,forms} && \
+npm --silent install
+npx tailwindcss -i index.css -o ../public/tailwind.css --minify --watch
+

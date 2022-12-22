@@ -28,24 +28,24 @@ describe App do
   end
 
   it "serves valid json on /events" do
-    header "accept", "application/json"
-    get "/events"
+    header "Accept", "application/json"
+    get "/events", {"Accept": "application/json"}
     data = JSON.parse last_response.body
     expect(data.size).to eq 3
   end
 
   it "conforms to json api spec on /events" do
-    header "accept", "application/json"
-    get "/events"
+    header "Accept", "application/json"
+    get "/events", {"Accept": "application/json"}
     response = JSON.parse last_response.body
     # ap response[0]
     expect(response[0]["data"].keys).to eq(%w[id type attributes])
   end
 
-  it "creates event via get request to /events/new" do
-    header "accept", "application/json"
-    get "/events/new"
-    response = JSON.parse last_response.body
-    expect(response["data"].keys).to eq(%w[id type attributes])
-  end
+  # it "creates event via get request to /events/new" do
+  #   header "Accept", "application/json"
+  #   get "/events/new", {"Accept": "application/json"}
+  #   response = JSON.parse last_response.body
+  #   expect(response["data"].keys).to eq(%w[id type attributes])
+  # end
 end

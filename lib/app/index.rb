@@ -1,6 +1,13 @@
+# frozen_string_literal: true
+
+#=====================================
+
+APP_VERSION = "0.1"
 require "rubygems"
 require "bundler"
 def production? = ENV["APP_ENV"] == "production"
+
+def development? = ENV["APP_ENV"] == "development"
 envs = [:default]
 envs += [:development, :test] unless production?
 Bundler.require(*envs)
@@ -10,22 +17,25 @@ Bundler.require(*envs)
 require "sinatra/base"
 require "sinatra/respond_with"
 require "sinatra/activerecord"
+require "sinatra/reloader"
 require "jsonapi/serializer"
 require "rack/cache"
+require "rack/contrib"
 require "digest/sha1"
 
 #=====================================
 
-APP_VERSION = "0.1"
-
+# Example serializer
 class EventSerializer
   # https://github.com/jsonapi-serializer/jsonapi-serializer#model-definition
   include JSONAPI::Serializer
-
   set_type :event
   attributes :name, :place, :created_at
 end
 
+#=====================================
+
+# Example model
 class Event < ActiveRecord::Base
   validates :name, presence: true
   # validates :place, presence: true
@@ -34,46 +44,22 @@ class Event < ActiveRecord::Base
     EventSerializer.new(self).serializable_hash
   end
 
-  def to_json
-    to_h.to_json
-  end
-
   def sha1
     Digest::SHA1.hexdigest("#{id}#{created_at}#{APP_VERSION}")
   end
 end
 
+#=====================================
+
+# Sinatra App
 class App < Sinatra::Base
-  register Sinatra::RespondWith
-  enable :inline_templates
+  # use Rack::Cache
   use Rack::Deflater
-  use Rack::Cache
-
-  module DatabaseHelpers
-    def ensure_table(name)
-      unless table_exists?(name)
-        create_table name
-      end
-    end
-
-    def ensure_column(table:, column:, type:)
-      unless column_exists?(table, column)
-        change_table table do |t|
-          t.send(type, column)
-        end
-      end
-    end
-  end
-
-  ActiveRecord::Schema.define do
-    extend DatabaseHelpers
-    ensure_table(:events)
-    ensure_column(column: :name, type: :string, table: :events)
-    ensure_column(column: :place, type: :string, table: :events)
-    ensure_column(column: :thing, type: :string, table: :events)
-    ensure_column(column: :created_at, type: :datetime, table: :events)
-  end
-
+  use Rack::JSONBodyParser
+  register Sinatra::Reloader if development?
+  register Sinatra::RespondWith
+  respond_to :html, :json
+  enable :inline_templates
   set :server, "puma"
   set :bind, "0.0.0.0"
   set :port, 3000
@@ -82,8 +68,22 @@ class App < Sinatra::Base
 
   def hx_request? = request.env["HTTP_HX_REQUEST"].present?
 
-  before do
-    expires 500, :public, :must_revalidate
+  # Database schema
+  ActiveRecord::Schema.define do
+    def ensure_table(name)
+      return if table_exists?(name)
+      create_table name
+    end
+
+    def ensure_column(table:, column:, type:)
+      return if column_exists?(table, column)
+      change_table(table { |t| t.send(type, column) })
+    end
+    ensure_table(:events)
+    ensure_column(column: :name, type: :string, table: :events)
+    ensure_column(column: :place, type: :string, table: :events)
+    ensure_column(column: :thing, type: :string, table: :events)
+    ensure_column(column: :created_at, type: :datetime, table: :events)
   end
 
   get "/" do
@@ -91,33 +91,11 @@ class App < Sinatra::Base
     slim :index
   end
 
-  get "/tw" do
-    etag APP_VERSION
-    slim :table
-  end
-
-  get "/events/new" do
-    @event = Event.create(name: "Party", place: "House")
-    respond_to do |f|
-      etag @event.sha1
-      f.html { slim :event }
-      f.json { @event.to_json }
-    end
-  end
-
-  get "/events/last" do
-    @event = Event.last || Event.none
-    respond_to do |f|
-      etag @events.last&.sha1 || Time.now
-      f.html { slim :event }
-      f.json { @event.to_json }
-    end
-  end
-
   get "/events" do
     @events = Event.all
     @event_count = Event.count
     respond_to do |f|
+      last_modified @events&.last&.created_at || Time.now
       etag @events.last&.sha1 || Time.now
       f.html { slim :events }
       f.json { @events.map(&:to_h).to_json }
@@ -126,28 +104,25 @@ class App < Sinatra::Base
 
   get "/events/:id" do
     @event = Event.find(params[:id])
-    @event_count = Event.count
-    # last_modified @event.created_at
     respond_to do |f|
+      last_modified @event.created_at
       etag @event.sha1
-      f.html { slim :event, layout: !hx_request? }
-      f.json { @event.to_json }
+      f.html { slim :event }
+      f.json { @event.to_h }
     end
   end
 
   post "/events" do
-    @event = Event.create(name: params[:name])
+    @event = Event.new
     @event.created_at = Time.now
+    @event.name = params[:name]
     @event.place = params[:place]
     @event.thing = params[:thing]
     @event.save
-
     @event_count = Event.count
-
     respond_to do |f|
-      etag @event.sha1
       f.html { slim :event, layout: !hx_request? }
-      f.json { @event.to_json }
+      f.json { @event.to_h }
     end
   end
 
@@ -166,18 +141,15 @@ ul
   - @events.each do |event|
     li: a[href="/events/#{event.id}"] = "#{event.name} #{event.created_at}"
 
-
 @@event
 #hxt-event
   h1.prose.prose-h1.text-4xl.font-bold.text-gray-200 = "Events  #{@event_count}"
   hr
   .p-4
     a.mr-4[href="/events"]: button.btn Go back
-
     button.btn[hx-post="/events?name=slim&place=home"
       hx-swap="innerHTML"
       hx-target="#hxt-event"] Click Me
-
   == slim :card
 
 @@card
@@ -248,9 +220,6 @@ ul
         .flex.flex-col
           dt.mb-2.text-3xl.font-extrabold 1000s
           dd.font-light.text-gray-500.dark:text-gray-400 Open source projects
-
-
-
 
 @@breadcrumb
   nav.flex.px-5.py-3.text-gray-700.border.border-gray-200.rounded-lg.bg-gray-50.dark:bg-gray-800.dark:border-gray-700 aria-label="Breadcrumb"
@@ -344,8 +313,6 @@ ul
                   td.py-4.px-6.text-sm.font-medium.text-right.whitespace-nowrap
                     a.text-blue-600.dark:text-blue-500.hover:underline href="#"  Edit
 
-
-
 @@nav
   nav.bg-white.border-gray-200.px-2.sm:px-4.rounded.dark:bg-gray-900 class="py-2.5"
     .container.flex.flex-wrap.items-center.justify-between.mx-auto
@@ -374,7 +341,6 @@ ul
   html
     head
       == slim :head
-
     body.bg-gray-900.text-white
       == slim :nav
       == slim :breadcrumb
@@ -388,5 +354,4 @@ ul
   meta charset="utf-8"
   meta name="viewport" content="width=device-width, initial-scale=1.0"
   link rel="stylesheet" href="/tailwind.css"
-
   title Bfield.app

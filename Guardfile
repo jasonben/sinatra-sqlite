@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 guard 'rspec', cmd: "rspec --color --format doc" do
   # watch /lib/ files
   watch(%r{^lib/app/(.+).rb$}) do |m|

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 $: << File.join(File.dirname(__FILE__), "..", "lib/app")
 require "script"
 require "index"

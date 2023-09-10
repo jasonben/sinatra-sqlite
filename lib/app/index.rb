@@ -131,6 +131,7 @@ end
 
 __END__
 #=====================================
+#@begin=slim@
 
 @@index
   h1 Slim Sinatra Is Fun!
@@ -355,3 +356,5 @@ ul
   meta name="viewport" content="width=device-width, initial-scale=1.0"
   link rel="stylesheet" href="/tailwind.css"
   title Bfield.app
+
+#@end=slim@

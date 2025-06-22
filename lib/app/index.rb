@@ -6,8 +6,7 @@ APP_VERSION = "0.1"
 require "rubygems"
 require "bundler"
 def production? = ENV["APP_ENV"] == "production"
-
-def development? = ENV["APP_ENV"] == "development"
+def development? = ENV["APP_ENV"] == "development" # rubocop:disable Layout/EmptyLineBetweenDefs
 envs = [:default]
 envs += [:development, :test] unless production?
 Bundler.require(*envs)
@@ -19,7 +18,6 @@ require "sinatra/respond_with"
 require "sinatra/activerecord"
 require "sinatra/reloader"
 require "jsonapi/serializer"
-require "rack/cache"
 require "rack/contrib"
 require "digest/sha1"
 
@@ -53,7 +51,6 @@ end
 
 # Sinatra App
 class App < Sinatra::Base
-  # use Rack::Cache
   use Rack::Deflater
   use Rack::JSONBodyParser
   register Sinatra::Reloader if development?
@@ -66,7 +63,12 @@ class App < Sinatra::Base
   set :strict_paths, false
   set :logging, true
 
-  def hx_request? = request.env["HTTP_HX_REQUEST"].present?
+  ActiveRecord::Base.establish_connection(
+    adapter: "sqlite3",
+    database: "db/development.sqlite3",
+    pool: 5,
+    timeout: 5000
+  )
 
   # Database schema
   ActiveRecord::Schema.define do
@@ -77,28 +79,52 @@ class App < Sinatra::Base
 
     def ensure_column(table:, column:, type:)
       return if column_exists?(table, column)
-      change_table(table { |t| t.send(type, column) })
+      change_table table do |t|
+        t.send(type, column)
+      end
     end
     ensure_table(:events)
     ensure_column(column: :name, type: :string, table: :events)
     ensure_column(column: :place, type: :string, table: :events)
     ensure_column(column: :thing, type: :string, table: :events)
     ensure_column(column: :created_at, type: :datetime, table: :events)
+    ensure_column(column: :updated_at, type: :datetime, table: :events)
   end
+
+  helpers do
+    def hx_request? = request.env["HTTP_HX_REQUEST"].present?
+
+    def hx_redirect(path)
+      if hx_request?
+        headers "HX-Redirect" => path
+        status 200
+        ""
+      else
+        redirect path
+      end
+    end
+  end
+
+  set :layout, -> { !hx_request? }
 
   get "/" do
     etag APP_VERSION
     slim :index
   end
 
+  get "/events/new" do
+    slim :events_new
+  end
+
   get "/events" do
-    @events = Event.all
-    @event_count = Event.count
+    @events = Event.order(created_at: :desc)
+    last_event = @events.last
+
     respond_to do |f|
-      last_modified @events&.last&.created_at || Time.now
-      etag @events.last&.sha1 || Time.now
+      etag last_event&.sha1
+      last_modified last_event&.created_at
       f.html { slim :events }
-      f.json { @events.map(&:to_h).to_json }
+      f.json { json @events.map(&:to_h) }
     end
   end
 
@@ -115,13 +141,15 @@ class App < Sinatra::Base
   post "/events" do
     @event = Event.new
     @event.created_at = Time.now
+    @event.updated_at = Time.now
     @event.name = params[:name]
     @event.place = params[:place]
     @event.thing = params[:thing]
     @event.save
-    @event_count = Event.count
+    @event.reload
+
     respond_to do |f|
-      f.html { slim :event, layout: !hx_request? }
+      f.html { hx_redirect("/events/#{@event.id}") }
       f.json { @event.to_h }
     end
   end
@@ -131,40 +159,36 @@ end
 
 __END__
 #=====================================
-#@begin=slim@
 
 @@index
   h1 Slim Sinatra Is Fun!
+  a.inline-flex.items-center.px-3.py-2.text-sm.font-medium.text-center.text-white.bg-blue-700.rounded-lg.hover:bg-blue-800.focus:ring-4.focus:outline-none.focus:ring-blue-300.dark:bg-blue-600.dark:hover:bg-blue-700.dark:focus:ring-blue-800 href="/events/new"
+        | New Event
 
 @@events
-h1 Events #{@event_count}
-ul
+h1 Events #{@events.count}
+.grid.grid-cols-2.gap-1
   - @events.each do |event|
-    li: a[href="/events/#{event.id}"] = "#{event.name} #{event.created_at}"
+    == slim :card, locals: {event: event}
 
 @@event
-#hxt-event
-  h1.prose.prose-h1.text-4xl.font-bold.text-gray-200 = "Events  #{@event_count}"
-  hr
-  .p-4
-    a.mr-4[href="/events"]: button.btn Go back
-    button.btn[hx-post="/events?name=slim&place=home"
-      hx-swap="innerHTML"
-      hx-target="#hxt-event"] Click Me
-  == slim :card
+  #hxt-event
+    .p-4
+      button.btn[hx-post="/events?name=slim&place=home"
+        hx-swap="innerHTML"
+        hx-target="#hxt-event"] Click Me
+    == slim :card, locals: {event: @event}
 
 @@card
-  .max-w-sm.bg-white.border.border-gray-200.rounded-lg.shadow-md.dark:bg-gray-800.dark:border-gray-700
-    a href="#"
-      img.rounded-t-lg alt="" src="/image-1.jpg" /
+  .bg-white.border.border-gray-200.rounded-lg.shadow-md.dark:bg-gray-800.dark:border-gray-700
+    img.rounded-t-sm alt="" src="/image-1.jpg" /
     .p-5
-      a href="#"
       h5.mb-2.text-2xl.font-bold.tracking-tight.text-gray-900.dark:text-white
-        = "#{@event&.name || "Hello"}@#{@event&.place || "World"}"
+        = "#{event&.name || "Hello"}@#{event&.place || "World"}"
       p.mb-3.font-normal.text-gray-700.dark:text-gray-400
-        = "#{@event.created_at || Time.now}"
+        = "#{event.created_at || Time.now}"
       p.mb-3.font-normal.text-gray-700.dark:text-gray-400 Here are the biggest enterprise technology acquisitions of 2021 so far, in reverse chronological order.
-      a.inline-flex.items-center.px-3.py-2.text-sm.font-medium.text-center.text-white.bg-blue-700.rounded-lg.hover:bg-blue-800.focus:ring-4.focus:outline-none.focus:ring-blue-300.dark:bg-blue-600.dark:hover:bg-blue-700.dark:focus:ring-blue-800 href="#"
+      a.inline-flex.items-center.px-3.py-2.text-sm.font-medium.text-center.text-white.bg-blue-700.rounded-lg.hover:bg-blue-800.focus:ring-4.focus:outline-none.focus:ring-blue-300.dark:bg-blue-600.dark:hover:bg-blue-700.dark:focus:ring-blue-800 href="/events/#{event.id}"
         | Read more
         svg.w-4.h-4.ml-2.-mr-1 aria-hidden="true" fill="currentColor" viewbox=("0 0 20 20") xmlns="http://www.w3.org/2000/svg"
           path clip-rule="evenodd" d=("M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z") fill-rule="evenodd"
@@ -357,4 +381,22 @@ ul
   link rel="stylesheet" href="/tailwind.css"
   title Bfield.app
 
-#@end=slim@
+@@events_new
+  form action="/events" method="post" class="max-w-sm mx-auto mt-10 bg-white border border-gray-200 rounded-lg shadow-md p-6 space-y-4 dark:bg-gray-800 dark:border-gray-700"
+    h2.text-xl.font-semibold.text-gray-900.dark:text-white Enter Information
+
+    div
+      label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300" Name
+      input type="text" name="name" id="name" required="true" class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+
+    div
+      label for="place" class="block text-sm font-medium text-gray-700 dark:text-gray-300" Place
+      input type="text" name="place" id="place" required="true" class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+
+    div
+      label for="thing" class="block text-sm font-medium text-gray-700 dark:text-gray-300" Thing
+      input type="text" name="thing" id="thing" required="true" class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+
+    div
+      button type="submit" class="w-full py-2 px-4 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        | Submit

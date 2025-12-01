@@ -2,7 +2,7 @@
 
 #=====================================
 
-APP_VERSION = "0.1"
+APP_VERSION = "0.1.1"
 require "rubygems"
 require "bundler"
 def production? = ENV["APP_ENV"] == "production"
@@ -120,59 +120,31 @@ class App < Sinatra::Base
             <title>Bfield.app</title>
           </head>
           <body class="text-white bg-gray-900">
-            <nav class="bg-white border-gray-200 px-2 sm:px-4 rounded dark:bg-gray-900 py-2.5">
-              <div class="container flex flex-wrap items-center justify-between mx-auto">
-                <a href="/" class="flex items-center">
-                  <img src="/logo.svg" class="h-6 mr-3 sm:h-9" loading="lazy" />
-                  <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">Bfield.app</span>
-                </a>
-                <div class="flex md:order-2">
-                  <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Get started</button>
-                  <button type="button" data-collapse-toggle="navbar-cta" aria-controls="navbar-cta" aria-expanded="false" class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
-                    <span class="sr-only">Open main menu</span>
-                    <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                    </svg>
-                  </button>
-                </div>
-                <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-cta">
-                  <ul class="flex flex-col p-4 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-                    <li><a href="#" class="block py-2 pl-3 pr-4 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white" aria-current="page">Home</a></li>
-                    <li><a href="#" class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-white dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">About</a></li>
-                    <li><a href="#" class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-white dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Services</a></li>
-                    <li><a href="#" class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-white dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Contact</a></li>
-                  </ul>
-                </div>
-              </div>
-            </nav>
-            <nav class="flex px-5 py-3 text-gray-700 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700" aria-label="Breadcrumb">
-              <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li class="inline-flex items-center">
-                  <a href="/" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                    </svg>
-                    Home
+            <div class="md:container md:mx-auto">
+              <nav class="px-2 py-2 bg-white border-gray-200 rounded sm:px-4 dark:bg-gray-900">
+                <div class="container flex flex-wrap items-center justify-between mx-auto">
+                  <a href="/" class="flex items-center">
+                    <img src="/logo.svg" class="h-6 mr-3 sm:h-9" loading="lazy" />
+                    <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">Bfield.app</span>
                   </a>
-                </li>
-                <li>
-                  <div class="flex items-center">
-                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                    </svg>
-                    <a href="/events" class="ml-1 text-sm font-medium text-gray-700 hover:text-gray-900 md:ml-2 dark:text-gray-400 dark:hover:text-white">Events</a>
+                  <div class="flex md:order-2">
+                    <a href="/events/new" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">New Event</a>
+                    <button type="button" data-collapse-toggle="navbar-cta" aria-controls="navbar-cta" aria-expanded="false" class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
+                      <span class="sr-only">Open main menu</span>
+                      <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                      </svg>
+                    </button>
                   </div>
-                </li>
-                <li aria-current="page">
-                  <div class="flex items-center">
-                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                    </svg>
-                    <a href="/tw" class="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">All</a>
+                  <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-cta">
+                    <ul class="flex flex-col p-4 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+                      <li><a href="/" class="block py-2 pl-3 pr-4 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white" aria-current="page">Home</a></li>
+                      <li><a href="/events" class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-white dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Events</a></li>
+                    </ul>
                   </div>
-                </li>
-              </ol>
-            </nav>
+                </div>
+              </nav>
+            </div>
             <div class="p-4 px-4 md:container md:mx-auto">
               <%= content %>
             </div>
@@ -214,37 +186,40 @@ class App < Sinatra::Base
     etag APP_VERSION
     render_with_layout do
       erb <<~ERB
-        <h1>Sinatra Is Fun!</h1>
+        <h1>Sinatra Is Fun! v#{APP_VERSION}</h1>
       ERB
     end
   end
 
   get "/events/new" do
+    etag APP_VERSION
     render_with_layout do
       erb <<~ERB
         <form action="/events" method="post" class="max-w-sm p-6 mx-auto mt-10 bg-white border border-gray-200 rounded-lg shadow-md space-y-4 dark:bg-gray-800 dark:border-gray-700">
-          <div class="p-4">
-            <h2 class="m-8 text-xl font-semibold text-gray-900 dark:text-white">Enter Information</h2>
+          <div class="px-4">
+            <h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">New Event</h2>
 
-            <div class="mb-3">
-              <label for="name" class="block text-sm font-medium text-gray-400 dark:text-gray-300">Name</label>
-              <input type="text" name="name" id="name" required class="block w-full mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
-            </div>
+            <div class="flex flex-col gap-4">
+              <div>
+                <label for="name" class="block text-sm font-medium text-gray-400 dark:text-gray-300">Name</label>
+                <input type="text" name="name" id="name" required class="block w-full mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
+              </div>
 
-            <div class="mb-3">
-              <label for="place" class="block text-sm font-medium text-gray-400 dark:text-gray-300">Place</label>
-              <input type="text" name="place" id="place" required class="block w-full mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
-            </div>
+              <div>
+                <label for="place" class="block text-sm font-medium text-gray-400 dark:text-gray-300">Place</label>
+                <input type="text" name="place" id="place" required class="block w-full mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
+              </div>
 
-            <div class="mb-3">
-              <label for="thing" class="block text-sm font-medium text-gray-400 dark:text-gray-300">Thing</label>
-              <input type="text" name="thing" id="thing" required class="block w-full mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
-            </div>
+              <div>
+                <label for="thing" class="block text-sm font-medium text-gray-400 dark:text-gray-300">Thing</label>
+                <input type="text" name="thing" id="thing" required class="block w-full mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
+              </div>
 
-            <div class="mb-3">
-              <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                Submit
-              </button>
+              <div>
+                <button type="submit" class="w-full px-4 py-2 mt-4 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  Submit
+                </button>
+              </div>
             </div>
           </div>
         </form>
@@ -255,26 +230,30 @@ class App < Sinatra::Base
   get "/events/:id/edit" do
     @event = Event.find(params[:id])  # Adjust based on your data store
 
+    etag @event.sha1
+    last_modified @event.updated_at
+
     render_with_layout do
       erb <<~ERB
-        <form action="/events/#{@event.id}" method="post" class="max-w-sm p-6 mx-auto mt-10 bg-white border border-gray-200 rounded-lg shadow-md space-y-4 dark:bg-gray-800 dark:border-gray-700">
+        <form action="/events/#{@event.id}" method="post" class="max-w-sm mx-auto mt-10 bg-white border border-gray-200 rounded-lg shadow-md space-y-4 dark:bg-gray-800 dark:border-gray-700">
           <input type="hidden" name="_method" value="put">
-          <div class="p-4">
-            <h2 class="m-8 text-xl font-semibold text-gray-900 dark:text-white">Edit Event</h2>
-            <div class="mb-3">
-              <label for="name" class="block text-sm font-medium text-gray-400 dark:text-gray-300">Name</label>
-              <input type="text" name="name" id="name" value="#{@event.name}" required class="block w-full mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
-            </div>
-            <div class="mb-3">
-              <label for="place" class="block text-sm font-medium text-gray-400 dark:text-gray-300">Place</label>
-              <input type="text" name="place" id="place" value="#{@event.place}" required class="block w-full mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
-            </div>
-            <div class="mb-3">
-              <label for="thing" class="block text-sm font-medium text-gray-400 dark:text-gray-300">Thing</label>
-              <input type="text" name="thing" id="thing" value="#{@event.thing}" required class="block w-full mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
-            </div>
-            <div class="mb-3">
-              <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+          <div class="px-4">
+            <h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Edit Event</h2>
+            <div class="flex flex-col gap-4">
+              <div>
+                <label for="name" class="block text-sm font-medium text-gray-400 dark:text-gray-300">Name</label>
+                <input type="text" name="name" id="name" value="#{@event.name}" required class="block w-full mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
+              </div>
+              <div>
+                <label for="place" class="block text-sm font-medium text-gray-400 dark:text-gray-300">Place</label>
+                <input type="text" name="place" id="place" value="#{@event.place}" required class="block w-full mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
+              </div>
+              <div>
+                <label for="thing" class="block text-sm font-medium text-gray-400 dark:text-gray-300">Thing</label>
+                <input type="text" name="thing" id="thing" value="#{@event.thing}" required class="block w-full mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
+              </div>
+              <button type="submit" class="w-full px-4 py-2 mb-4 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 Update
               </button>
             </div>
@@ -282,16 +261,6 @@ class App < Sinatra::Base
         </form>
       ERB
     end
-  end
-
-  put "/events/:id" do
-    event = Event.find(params[:id])
-    event.update(
-      name: params[:name],
-      place: params[:place],
-      thing: params[:thing]
-    )
-    redirect "/events"
   end
 
   get "/events" do
@@ -305,12 +274,7 @@ class App < Sinatra::Base
       f.html do
         render_with_layout do
           erb <<~ERB
-            <h1>Events <%= @events.count %></h1>
-            <div class="my-4">
-              <a href="/events/new" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                New Event
-              </a>
-            </div>
+            <h1 class="mb-4">Events: <%= @events.count %></h1>
             <div class="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-2 gap-4">
               <% @events.each do |event| %>
                 <%= render_card(event) %>
@@ -320,7 +284,7 @@ class App < Sinatra::Base
         end
       end
 
-      f.json { json @events.map(&:to_h) }
+      f.json { json EventSerializer.new(@events).serializable_hash }
     end
   end
 
@@ -347,13 +311,23 @@ class App < Sinatra::Base
     end
   end
 
+  put "/events/:id" do
+    event = Event.find(params[:id])
+    event.update(
+      name: params[:name],
+      place: params[:place],
+      thing: params[:thing]
+    )
+    redirect "/events"
+  end
+
   post "/events" do
     @event = Event.new
-    @event.created_at = Time.now
-    @event.updated_at = Time.now
     @event.name = params[:name]
     @event.place = params[:place]
     @event.thing = params[:thing]
+    @event.created_at = Time.now
+    @event.updated_at = Time.now
     @event.save
 
     respond_to do |f|
